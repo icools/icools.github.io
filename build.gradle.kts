@@ -20,6 +20,7 @@ repositories {
     google()
 }
 
+
 kotlin {
     js(IR) {
         browser()
@@ -27,7 +28,6 @@ kotlin {
     }
 
     sourceSets {
-
         val jsMain by getting {
             dependencies {
                 implementation(npm("highlight.js", "10.7.2"))
