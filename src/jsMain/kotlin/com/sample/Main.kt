@@ -12,9 +12,10 @@ fun main() {
         Style(AppStylesheet)
 
         Layout {
-            Header()
+            //Header()
             MainContentLayout {
-                Intro()
+                IntroCustom()
+                //Intro()
                 ComposeWebLibraries()
                 GetStarted()
                 CodeSamples()

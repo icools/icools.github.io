@@ -7,11 +7,14 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import com.sample.components.ContainerInSection
 import com.sample.style.*
-import com.sample.web.getFromOutSide
+import com.sample.web.getUBikeList
 import kotlinx.coroutines.*
 
+private val scope = MainScope()
+private var responseText: String by mutableStateOf("Loading...")
+
 @Composable
-fun Intro() {
+fun IntroCustom() {
     ContainerInSection {
         Div({
             classes(WtRows.wtRow, WtRows.wtRowSizeM, WtRows.wtRowSmAlignItemsCenter)
@@ -77,7 +80,7 @@ private fun IntroAboutComposeWeb() {
             classes(WtCols.wtCol9, WtCols.wtColMd9, WtCols.wtColSm12)
         }) {
             P({ classes(WtTexts.wtSubtitle2, WtOffsets.wtTopOffset24) }) {
-                Text("Reactive web UIs for Kotlin, based on Google's ")
+                Text("Fetching ubike list:")
 
                 A(href = "https://developer.android.com/jetpack/compose", attrs = {
                     classes(WtTexts.wtLink)
@@ -92,12 +95,8 @@ private fun IntroAboutComposeWeb() {
             P({
                 classes(WtTexts.wtText1, WtOffsets.wtTopOffset24)
             }) {
-            Text(
-                "Compose for Web simplifies and accelerates UI development for web applications, " +
-                        "and aims to enable UI code sharing between web, desktop, and Android applications " +
-                        "in the future."
-            )
-        }
+                Text(responseText)
+            }
 
             //ComposeWebStatusMessage()
 
@@ -113,6 +112,20 @@ private fun IntroAboutComposeWeb() {
                 Text("Explore on GitHub")
             }
         }
+    }
+
+    scope.launch {
+        responseText = getUBikeList().takeIf {
+            it.isNotEmpty()
+        }?.let{ list ->
+            var text = ""
+            list.map{
+                it.sna
+            }.forEach { sna ->
+                text += sna
+            }
+            text
+        } ?: "Loading..."
     }
 }
 
@@ -175,7 +188,6 @@ private fun IntroCodeSampleResult() {
         }) {
             Text("Result:")
         }
-
         fun greet() = listOf("Hello", "Hallo", "Hola", "Servus").random()
 
         Div({
