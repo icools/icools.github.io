@@ -3,51 +3,14 @@ package com.sample.content
 import androidx.compose.runtime.*
 import com.sample.components.ContainerInSection
 import com.sample.style.*
-import com.sample.web.getSellCount
-import com.sample.web.getUBikeList
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
+import com.sample.viewmodel.SellCountUiState
 import org.jetbrains.compose.web.attributes.ATarget
 import org.jetbrains.compose.web.attributes.target
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 
-private val scope = MainScope()
-private var uiState: SellCountUiState by mutableStateOf(SellCountUiState())
-
-data class SellCountUiState(
-    val responseTextUBike: String = "Loading...",
-    val responseTextRapid: String = "Loading..."
-)
-
-class SellCountViewModel {
-    fun getCountByFilter(filterId: String = "593106") {
-        scope.launch {
-            getSellCount()
-                .let {
-                    it[filterId]
-                }.let {
-                    "${it?.name},剩餘:${it?.count},Note:${it?.note ?: "無"}"
-                }.let{
-                    uiState = uiState.copy(responseTextRapid = it)
-                }
-        }
-    }
-
-    fun getUBike() {
-        scope.launch {
-            val data = getUBikeList().takeIf {
-                it.isNotEmpty()
-            }?.first()?.let {
-                "${it.sna} Total:${it.tot} ,Time:${it.updateTime}"
-            } ?: "Loading..."
-            uiState = uiState.copy(responseTextUBike = data)
-        }
-    }
-}
-
 @Composable
-fun IntroCustom() {
+fun IntroCustom(uiState: SellCountUiState) {
     ContainerInSection {
         Div({
             classes(WtRows.wtRow, WtRows.wtRowSizeM, WtRows.wtRowSmAlignItemsCenter)
@@ -89,7 +52,7 @@ fun IntroCustom() {
                 Div({
                     classes(WtDisplay.wtDisplayMdNone)
                 }) {
-                    IntroAboutComposeWeb()
+                    IntroAboutComposeWeb(uiState)
                 }
             }
         }
@@ -98,28 +61,33 @@ fun IntroCustom() {
         Div(attrs = {
             classes(WtDisplay.wtDisplayNone, WtDisplay.wtDisplayMdBlock)
         }) {
-            IntroAboutComposeWeb()
+            IntroAboutComposeWeb(uiState)
         }
     }
 }
 
 @Composable
-private fun IntroAboutComposeWeb() {
+private fun IntroAboutComposeWeb(uiState: SellCountUiState) {
     Div({
         classes(WtRows.wtRow, WtRows.wtRowSizeM)
     }) {
         Div({
             classes(WtCols.wtCol9, WtCols.wtColMd9, WtCols.wtColSm12)
         }) {
-            P({ classes(WtTexts.wtSubtitle2, WtOffsets.wtTopOffset24) }) {
-                Text("快篩統計,${uiState.responseTextRapid}")
+
+            P({ classes(WtOffsets.wtTopOffset24) }) {
+                Text("快篩統計:")
+            }
+            Text(uiState.rapidTest)
+
+            P({ classes(WtOffsets.wtTopOffset24) }) {
+                Text("UBIKE資訊:")
+                Text(uiState.ubike)
             }
 
-            P({ classes(WtTexts.wtSubtitle2, WtOffsets.wtTopOffset24) }) {
-                Text("UBIKE資訊:")
-            }
             P({ classes(WtOffsets.wtTopOffset24) }) {
-                Text(uiState.responseTextUBike)
+                Text("CMS:")
+                Text(uiState.cms)
             }
 
             //ComposeWebStatusMessage()
@@ -135,11 +103,6 @@ private fun IntroAboutComposeWeb() {
                 Text("Explore on GitHub")
             }
         }
-    }
-
-    SellCountViewModel().apply {
-        getCountByFilter()
-        getUBike()
     }
 }
 

@@ -7,8 +7,6 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import com.sample.components.ContainerInSection
 import com.sample.style.*
-import com.sample.web.getFromOutSide
-import kotlinx.coroutines.*
 
 @Composable
 fun Intro() {

@@ -49,7 +49,7 @@ private fun LanguageButton() {
             classes(WtTexts.wtButton, WtTexts.wtLangButton)
             onClick { window.alert("Oops! This feature is yet to be implemented") }
         }) {
-            Img(src = "ic_lang.svg", attrs = { style {
+            Img(src = "logo.jpg", attrs = { style {
                 paddingLeft(8.px)
                 paddingRight(8.px)
             }})

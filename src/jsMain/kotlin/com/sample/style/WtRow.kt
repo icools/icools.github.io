@@ -23,7 +23,7 @@ object WtRows : StyleSheet(AppStylesheet) {
     val wtRowSizeM by style {
         AppCSSVariables.wtHorizontalLayoutGutter(16.px)
 
-        media(mediaMaxWidth(640.px)) {
+        media(mediaMaxWidth(480.px)) {
             self style {
                 AppCSSVariables.wtHorizontalLayoutGutter(8.px)
             }

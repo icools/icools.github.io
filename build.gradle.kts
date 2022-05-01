@@ -36,6 +36,7 @@ kotlin {
 				
 				implementation("io.ktor:ktor-client-js:$ktorVersion")
                 implementation("io.ktor:ktor-client-json:$ktorVersion")
+                //implementation("io.ktor:ktor-server-cors:$ktorVersion")
                 implementation("io.ktor:ktor-client-serialization:$ktorVersion")
 
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:$reactVersion")

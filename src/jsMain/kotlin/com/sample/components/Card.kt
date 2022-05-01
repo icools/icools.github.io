@@ -38,7 +38,7 @@ private fun CardLink(link: LinkOnCard) {
 @Composable
 fun Card(
     title: String,
-    links: List<LinkOnCard>,
+    links: List<LinkOnCard>? = null,
     darkTheme: Boolean = false,
     wtExtraStyleClasses: List<String> = listOf(WtCols.wtCol6, WtCols.wtColMd6, WtCols.wtColSm12),
     content: @Composable () -> Unit
@@ -56,7 +56,7 @@ fun Card(
                 content()
             }
 
-            links.forEach {
+            links?.forEach {
                 CardLink(it)
             }
         }
@@ -66,7 +66,7 @@ fun Card(
 @Composable
 fun CardDark(
     title: String,
-    links: List<LinkOnCard>,
+    links: List<LinkOnCard>?,
     wtExtraStyleClasses: List<String> = listOf(WtCols.wtCol6, WtCols.wtColMd6, WtCols.wtColSm12),
     content: @Composable () -> Unit
 ) {
