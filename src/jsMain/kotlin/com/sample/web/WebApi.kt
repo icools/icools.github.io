@@ -5,6 +5,7 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 
 // https://data.gov.tw/
@@ -40,11 +41,11 @@ object WebApi {
     }
 
     suspend fun getStock(id: String = "2330"): Stock {
-        return jsonClient.get<Stock>("https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_${id}.tw&json=1&delay=0")
+        return jsonClient.get<Stock>("https://ktor-success-version.herokuapp.com/stock")
     }
 
     suspend fun getHospital(): String {
-        return jsonClient.get("https://wroom.vision.com.tw/MainPage/ClinicInfo.aspx?CliID=3vGr4ynzcBUAFBcLXgodLQ==#WInfos")
+        return jsonClient.get("https://ktor-success-version.herokuapp.com/hospital")
     }
 }
 

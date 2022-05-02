@@ -8,6 +8,7 @@ import org.jetbrains.compose.web.dom.*
 import com.sample.style.*
 import kotlinx.browser.window
 
+//@Preview
 @Composable
 fun Header() {
     Section(attrs = {

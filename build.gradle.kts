@@ -41,6 +41,9 @@ kotlin {
 
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react:$reactVersion")
                 implementation("org.jetbrains.kotlin-wrappers:kotlin-react-dom:$reactVersion")
+
+                //debugImplementation "androidx.compose.ui:ui-tooling:1.1.1"
+                //implementation ("androidx.compose.ui:ui-tooling-preview:1.1.1")
             }
         }
     }
