@@ -27,7 +27,7 @@ class MainViewModel {
         getUBike()
         getCms()
         getStore()
-        getHospital()
+        //getHospital()
     }
 
     private fun getCountByFilter(filterId: String = "593106") {
@@ -78,7 +78,6 @@ class MainViewModel {
             }.let{
                 uiState = uiState.copy(hospitalWaitingId = it)
             }
-
         }
     }
 }

@@ -37,11 +37,14 @@ object WebApi {
 
     // CMS https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH
     suspend fun getCmsList(): Cms {
-        return jsonClient.get<Cms>("https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH")
+        return jsonClient.get("https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH")
     }
 
     suspend fun getStock(id: String = "2330"): Stock {
-        return jsonClient.get<Stock>("https://ktor-success-version.herokuapp.com/stock")
+        return jsonClient.get("https://ktor-success-version.herokuapp.com/stock"){
+            header("Access-Control-Allow-Origin","*")
+            header("X-My-Custom-Header","Test")
+        }
     }
 
     suspend fun getHospital(): String {
