@@ -19,7 +19,8 @@ fun main() {
                 //IntroCustom(viewModel.uiState)
                 //Intro()
                 //ComposeWebLibraries()
-                GetStarted(viewModel.uiState)
+                GetStarted("即時資訊卡片", "Realtime dashboard", viewModel.uiState)
+                GetStarted2("台中水情", "about the water", viewModel.uiState)
                 //CodeSamples()
                 //JoinUs()
             }

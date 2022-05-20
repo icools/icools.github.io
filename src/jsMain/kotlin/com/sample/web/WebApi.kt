@@ -73,3 +73,5 @@ object WebApi {
 // 台南CCTV https://data.gov.tw/dataset/102311
 
 // CMS https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH
+
+// 疫情 https://od.cdc.gov.tw/eic/covid19/covid19_tw_stats.csv

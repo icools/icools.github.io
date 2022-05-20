@@ -81,10 +81,7 @@ private fun CardContent(text: String) {
 }
 
 @Composable
-fun GetStarted(uiState: SellCountUiState) {
-    val title = "即時資訊卡片"
-    val description = "compose for web + ktor client + kotlin + kotlin/js"
-
+fun GetStarted(title: String, description: String, uiState: SellCountUiState) {
     ContainerInSection(WtSections.wtSectionBgGrayDark) {
         H1(attrs = {
             classes(WtTexts.wtH2, WtTexts.wtH2ThemeDark)
@@ -123,6 +120,55 @@ fun GetStarted(uiState: SellCountUiState) {
                     CardContent(it.content)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun GetStarted2(title: String, description: String, uiState: SellCountUiState) {
+    ContainerInSection(WtSections.wtSectionBgGrayDark) {
+        H1(attrs = {
+            classes(WtTexts.wtH2, WtTexts.wtH2ThemeDark)
+        }) {
+            Text(title)
+        }
+
+        Div(attrs = {
+            classes(WtRows.wtRowSizeM, WtRows.wtRow, WtOffsets.wtTopOffset24)
+        }) {
+            Div(attrs = {
+                classes(WtCols.wtCol6, WtCols.wtColMd10, WtCols.wtColSm12, WtOffsets.wtTopOffset24)
+            }) {
+                P(attrs = {
+                    classes(WtTexts.wtText1)
+                    style {
+                        color(Color("#fff"))
+                    }
+                }) {
+                    Text(description)
+                }
+            }
+        }
+
+        Div(
+            attrs = {
+                classes(WtRows.wtRow, WtRows.wtRowSizeM, WtOffsets.wtTopOffset24)
+            }
+        ) {
+            uiState.taichungAirList?.map {
+                GetStartedCardPresentation(
+                    title = "${it.name}-${it.item}",
+                    content = "${it.value}(${it.status})"
+                )
+            }?.forEach {
+                CardDark(
+                    title = it.title,
+                    links = it.links,
+                    wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
+                ) {
+                    CardContent(it.content)
+                }
+            } ?: Text("Empty List...")
         }
     }
 }

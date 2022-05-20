@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.sample.model.Stock
+import com.sample.model.TaichungAir
 import com.sample.web.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -18,7 +19,8 @@ data class SellCountUiState(
     val stock: String = "Loading..",
     val hospitalWaitingId: String = "Loading...",
     val taipeiTraffic: String = "Loading...",
-    val taichungAir: String = "Loading..."
+    val taichungAir: String = "Loading...",
+    val taichungAirList: List<TaichungAir>? = null
 )
 
 class MainViewModel {
@@ -96,6 +98,7 @@ class MainViewModel {
     private fun getTaichungAir(){
         scope.launch {
             uiState = WebApi.getTaichungAir().let{
+                uiState = uiState.copy(taichungAirList = it)
                 it.random()
             }.let{
                 "${it.name} - ${it.value} (${it.time})"
