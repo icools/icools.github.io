@@ -3,18 +3,21 @@ package com.sample.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.sample.model.Stock
 import com.sample.web.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 
 data class SellCountUiState(
     val ubike: String = "Loading...",
     val rapidTest: String = "Loading...",
     val cms: String = "Loading...",
     val stock: String = "Loading..",
-    val hospitalWaitingId: String = "Loading..."
+    val hospitalWaitingId: String = "Loading...",
+    val taipeiTraffic: String = "Loading..."
 )
 
 class MainViewModel {
@@ -27,7 +30,8 @@ class MainViewModel {
         getUBike()
         getCms()
         getStore()
-        //getHospital()
+        getHospital()
+        getTaipeiTraffic()
     }
 
     private fun getCountByFilter(filterId: String = "593106") {
@@ -65,8 +69,24 @@ class MainViewModel {
 
     private fun getStore(id: String = "2330"){
         scope.launch {
-            WebApi.getStock().msgArray.first().z.let{ currentPrice ->
+            WebApi.getStock().let {
+                it.msgArray.first().z
+            }.let{ currentPrice ->
                 uiState = uiState.copy(stock = currentPrice)
+            }
+        }
+    }
+
+    private fun getTaipeiTraffic(){
+        scope.launch {
+            WebApi.getTaipeiTraffic().let{
+                it.newsList
+            }.let{
+                it.random()
+            }.let{
+                it.content
+            }.let{
+                uiState = uiState.copy(taipeiTraffic = it)
             }
         }
     }
@@ -74,8 +94,14 @@ class MainViewModel {
     private fun getHospital(){
         scope.launch {
             dataRepo.getHospital().let{
-                it.toString()
-            }.let{
+                uiState = uiState.copy(hospitalWaitingId = it)
+            }
+        }
+    }
+
+    private fun getCross(){
+        scope.launch {
+            dataRepo.getCross().let{
                 uiState = uiState.copy(hospitalWaitingId = it)
             }
         }
@@ -86,6 +112,10 @@ class MainDataRepo{
     //<td class="room-tartime winfo-data">0004</td>
     //Regex regex = new Regex("<span[^>]*>(.*?)</span>");
     //string toMatch = "<span class=\"ajjsjs\">Some text</span>";
+    suspend fun getCross(): String = withContext(Dispatchers.Default) {
+        WebApi.getCross()
+    }
+
     suspend fun getHospital() = withContext(Dispatchers.Default){
         WebApi.getHospital().let{
             val preTag = "room-tartime winfo-data\">"
@@ -98,6 +128,9 @@ class MainDataRepo{
                 }
             }
             it.substring(startIndex..endIndex)
-        }.toInt()
+        }//.toInt()
     }
 }
+
+//YouBike站位每月熱門站點
+//https://data.gov.tw/dataset/145725

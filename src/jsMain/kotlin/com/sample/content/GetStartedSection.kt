@@ -58,12 +58,12 @@ private fun getCards(uiState: SellCountUiState) = listOf(
         content = "Loading..."
     ),
     GetStartedCardPresentation(
-        title = "即時新聞",
-        content = "Loading..."
+        title = "臺北市即時交通訊息",
+        content = uiState.taipeiTraffic
     ),
     GetStartedCardPresentation(
         title = "診所候診",
-        content = "Loading..."
+        content = uiState.hospitalWaitingId
     )
 )
 

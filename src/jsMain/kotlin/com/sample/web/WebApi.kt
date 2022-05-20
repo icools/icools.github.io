@@ -11,6 +11,8 @@ import kotlinx.serialization.decodeFromString
 // https://data.gov.tw/
 
 object WebApi {
+    private const val USING_LOCALHOST = true
+
     private val jsonClient = HttpClient {
         install(JsonFeature) { serializer = KotlinxSerializer() }
     }
@@ -40,15 +42,25 @@ object WebApi {
         return jsonClient.get("https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH")
     }
 
-    suspend fun getStock(id: String = "2330"): Stock {
-        return jsonClient.get("https://ktor-success-version.herokuapp.com/stock"){
-            header("Access-Control-Allow-Origin","*")
-            header("X-My-Custom-Header","Test")
-        }
+    suspend fun getTaipeiTraffic(): TaipeiTraffic{
+        return jsonClient.get("https://tcgbusfs.blob.core.windows.net/dotapp/news.json")
     }
 
-    suspend fun getHospital(): String {
-        return jsonClient.get("https://ktor-success-version.herokuapp.com/hospital")
+    suspend fun getStock(id: String = "2330"): Stock {
+        return jsonClient.get(getUrl("/stock"))
+    }
+    suspend fun getHospital(): String = jsonClient.get(getUrl("/hospital"))
+
+    suspend fun getCross(): String {
+        return jsonClient.get(getUrl("/cross"))
+    }
+
+    private fun getUrl(actionName: String) = if (USING_LOCALHOST) {
+        "http://localhost:8088"
+    } else {
+        "https://ktor-success-version.herokuapp.com"
+    }.let {
+        "$it$actionName"
     }
 }
 
