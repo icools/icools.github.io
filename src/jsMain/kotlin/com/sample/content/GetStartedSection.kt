@@ -64,6 +64,10 @@ private fun getCards(uiState: SellCountUiState) = listOf(
     GetStartedCardPresentation(
         title = "診所候診",
         content = uiState.hospitalWaitingId
+    ),
+    GetStartedCardPresentation(
+        title = "台中水情",
+        content = uiState.taichungAir
     )
 )
 

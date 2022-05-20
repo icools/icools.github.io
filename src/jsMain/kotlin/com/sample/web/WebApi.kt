@@ -5,7 +5,6 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 import kotlinx.serialization.decodeFromString
 
 // https://data.gov.tw/
@@ -37,7 +36,6 @@ object WebApi {
         encodeDefaults = false
     }.decodeFromString<Map<String, RapidTestStore>>(this)
 
-    // CMS https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH
     suspend fun getCmsList(): Cms {
         return jsonClient.get("https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH")
     }
@@ -55,6 +53,10 @@ object WebApi {
         return jsonClient.get(getUrl("/cross"))
     }
 
+    suspend fun getTaichungAir(): List<TaichungAir>{
+        return jsonClient.get("https://datacenter.taichung.gov.tw/swagger/OpenData/1a129ee9-b4ce-491a-b7ed-a1f5e5ff19c1")
+    }
+
     private fun getUrl(actionName: String) = if (USING_LOCALHOST) {
         "http://localhost:8088"
     } else {
@@ -64,10 +66,10 @@ object WebApi {
     }
 }
 
-// 台中空氣品質 https://datacenter.taichung.gov.tw/swagger/OpenData/1a129ee9-b4ce-491a-b7ed-a1f5e5ff19c1
-
 // 水位 https://data.gov.tw/dataset/25768
 
-// 台北交通即時資訊 https://data.gov.tw/dataset/128476
-
 // 新竹及時停車  https://data.gov.tw/dataset/129136
+
+// 台南CCTV https://data.gov.tw/dataset/102311
+
+// CMS https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH

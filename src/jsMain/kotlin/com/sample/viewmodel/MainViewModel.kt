@@ -17,7 +17,8 @@ data class SellCountUiState(
     val cms: String = "Loading...",
     val stock: String = "Loading..",
     val hospitalWaitingId: String = "Loading...",
-    val taipeiTraffic: String = "Loading..."
+    val taipeiTraffic: String = "Loading...",
+    val taichungAir: String = "Loading..."
 )
 
 class MainViewModel {
@@ -32,6 +33,7 @@ class MainViewModel {
         getStore()
         getHospital()
         getTaipeiTraffic()
+        getTaichungAir()
     }
 
     private fun getCountByFilter(filterId: String = "593106") {
@@ -79,14 +81,26 @@ class MainViewModel {
 
     private fun getTaipeiTraffic(){
         scope.launch {
-            WebApi.getTaipeiTraffic().let{
+            uiState = WebApi.getTaipeiTraffic().let{
                 it.newsList
             }.let{
                 it.random()
             }.let{
                 it.content
             }.let{
-                uiState = uiState.copy(taipeiTraffic = it)
+                uiState.copy(taipeiTraffic = it)
+            }
+        }
+    }
+
+    private fun getTaichungAir(){
+        scope.launch {
+            uiState = WebApi.getTaichungAir().let{
+                it.random()
+            }.let{
+                "${it.name} - ${it.value} (${it.time})"
+            }.let{
+                uiState.copy(taichungAir = it)
             }
         }
     }
@@ -94,14 +108,6 @@ class MainViewModel {
     private fun getHospital(){
         scope.launch {
             dataRepo.getHospital().let{
-                uiState = uiState.copy(hospitalWaitingId = it)
-            }
-        }
-    }
-
-    private fun getCross(){
-        scope.launch {
-            dataRepo.getCross().let{
                 uiState = uiState.copy(hospitalWaitingId = it)
             }
         }
