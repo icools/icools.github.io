@@ -11,7 +11,7 @@ import kotlinx.serialization.decodeFromString
 // https://data.gov.tw/
 
 object WebApi {
-    private const val USING_LOCALHOST = true
+    private const val USING_LOCALHOST = false
 
     private val jsonClient = HttpClient {
         install(JsonFeature) { serializer = KotlinxSerializer() }
