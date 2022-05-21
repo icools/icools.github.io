@@ -1,6 +1,8 @@
 package com.sample.content
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import com.sample.components.CardDark
@@ -40,24 +42,11 @@ private fun getCards(uiState: SellCountUiState) = listOf(
     ),
     GetStartedCardPresentation(
         title = "CMS",
-        content = uiState.cms,
-        links = null
+        content = uiState.cms
     ),
     GetStartedCardPresentation(
         title = "台積電股價",
         content = uiState.stock
-    ),
-    GetStartedCardPresentation(
-        title = "勤崴股價",
-        content = "Loading..."
-    ),
-    GetStartedCardPresentation(
-        title = "台北空氣品質",
-        content = "Loading..."
-    ),
-    GetStartedCardPresentation(
-        title = "松山區天氣情況",
-        content = "Loading..."
     ),
     GetStartedCardPresentation(
         title = "臺北市即時交通訊息",
@@ -145,7 +134,9 @@ fun MixedInfoPage(title: String, description: String, uiState: SellCountUiState)
 @Composable
 fun TaichungWaterPage(title: String, description: String, airList: List<TaichungAir> = emptyList()) {
     CardStylePage(title, description) {
-        airList.map {
+        airList.filterIndexed { index, _ ->
+            index < 9
+        }.map {
             GetStartedCardPresentation(
                 title = "${it.name}-${it.item}",
                 content = "${it.value}(${it.status})"
@@ -167,20 +158,36 @@ fun TainanCctvPage(title: String, description: String, cctvList: List<TainanCctv
     CardStylePage(title, description) {
         cctvList.filter {
             it.url != null
-        }.map {
-            GetStartedCardPresentation(
-                title = "${it.positionName}",
-                content = "${it.lat}${it.lon}",
-                links = listOf(LinkOnCard(it.positionName, it.url ?: ""))
-            )
-        }.forEach {
+        }.forEach { cctv ->
+            val uiState = mutableStateOf(CctvUiState())
             CardDark(
-                title = it.title,
-                links = it.links,
+                title = cctv.positionName,
                 wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
-            ) {
-                CardContent(it.content)
+            ){
+                Button (attrs = {
+                    onClick {
+                        uiState.value = uiState.value.copy(
+                            url = cctv.url ?: "",
+                            width = 320.px,
+                            height = 200.px
+                        )
+                    }
+                }){
+                    Text("View")
+                }
+                Img(src = uiState.value.url, attrs = {
+                    style {
+                        width(uiState.value.width)
+                        height(uiState.value.height)
+                    }
+                })
             }
         }
     }
 }
+
+private data class CctvUiState(
+    var url: String = "",
+    var width: CSSSizeValue<CSSUnit.px> = 0.px,
+    var height: CSSSizeValue<CSSUnit.px> = 0.px
+)

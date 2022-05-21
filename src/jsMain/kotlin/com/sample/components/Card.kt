@@ -66,7 +66,7 @@ fun Card(
 @Composable
 fun CardDark(
     title: String,
-    links: List<LinkOnCard>?,
+    links: List<LinkOnCard>? = null,
     wtExtraStyleClasses: List<String> = listOf(WtCols.wtCol6, WtCols.wtColMd6, WtCols.wtColSm12),
     content: @Composable () -> Unit
 ) {
