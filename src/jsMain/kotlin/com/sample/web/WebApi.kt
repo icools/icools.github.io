@@ -5,6 +5,7 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.decodeFromString
 
 // https://data.gov.tw/
@@ -21,9 +22,7 @@ object WebApi {
         //return jsonClient.get("https://odws.hccg.gov.tw/001/Upload/25/opendataback/9059/452/25d47dd1-ac2b-405f-ac52-ba2f8b3071b6.json")
     }
 
-    suspend fun getUBikeList(): List<Ubike> {
-        return jsonClient.get("https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json")
-    }
+    suspend fun getUBikeList(): List<Ubike> = jsonClient.get("https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json")
 
     suspend fun getSellCount(): Map<String, RapidTestStore> {
         return jsonClient.get<String>("https://raw.githubusercontent.com/SiongSng/Rapid-Antigen-Test-Taiwan-Map/data/data/antigen.json")
@@ -64,13 +63,15 @@ object WebApi {
     }.let {
         "$it$actionName"
     }
+
+    object Tainan{
+        suspend fun getCctv(): List<TainanCctv> = jsonClient.get(getUrl("/tainanCctv"))
+    }
 }
 
 // 水位 https://data.gov.tw/dataset/25768
 
 // 新竹及時停車  https://data.gov.tw/dataset/129136
-
-// 台南CCTV https://data.gov.tw/dataset/102311
 
 // CMS https://itsapi.taipei.gov.tw/TPTS_API/roadInformation/CMSByLBS?distance=10000000&lng=121.460477&lat=25.019086&language=ZH
 

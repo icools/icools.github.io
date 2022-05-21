@@ -6,6 +6,8 @@ import org.jetbrains.compose.web.dom.*
 import com.sample.components.CardDark
 import com.sample.components.ContainerInSection
 import com.sample.components.LinkOnCard
+import com.sample.model.TaichungAir
+import com.sample.model.TainanCctv
 import com.sample.style.*
 import com.sample.viewmodel.SellCountUiState
 
@@ -81,94 +83,104 @@ private fun CardContent(text: String) {
 }
 
 @Composable
-fun GetStarted(title: String, description: String, uiState: SellCountUiState) {
-    ContainerInSection(WtSections.wtSectionBgGrayDark) {
-        H1(attrs = {
-            classes(WtTexts.wtH2, WtTexts.wtH2ThemeDark)
-        }) {
-            Text(title)
-        }
+private fun PageTitle(title: String = "") {
+    H1(attrs = {
+        classes(WtTexts.wtH2, WtTexts.wtH2ThemeDark)
+    }) {
+        Text(title)
+    }
+}
 
+@Composable
+private fun PageDescription(description: String = "") {
+    Div(attrs = {
+        classes(WtRows.wtRowSizeM, WtRows.wtRow, WtOffsets.wtTopOffset24)
+    }) {
         Div(attrs = {
-            classes(WtRows.wtRowSizeM, WtRows.wtRow, WtOffsets.wtTopOffset24)
+            classes(WtCols.wtCol6, WtCols.wtColMd10, WtCols.wtColSm12, WtOffsets.wtTopOffset24)
         }) {
-            Div(attrs = {
-                classes(WtCols.wtCol6, WtCols.wtColMd10, WtCols.wtColSm12, WtOffsets.wtTopOffset24)
+            P(attrs = {
+                classes(WtTexts.wtText1)
+                style {
+                    color(Color("#fff"))
+                }
             }) {
-                P(attrs = {
-                    classes(WtTexts.wtText1)
-                    style {
-                        color(Color("#fff"))
-                    }
-                }) {
-                    Text(description)
-                }
-            }
-        }
-
-        Div(
-            attrs = {
-                classes(WtRows.wtRow, WtRows.wtRowSizeM, WtOffsets.wtTopOffset24)
-            }
-        ) {
-            getCards(uiState).forEach {
-                CardDark(
-                    title = it.title,
-                    links = it.links,
-                    wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
-                ) {
-                    CardContent(it.content)
-                }
+                Text(description)
             }
         }
     }
 }
 
 @Composable
-fun GetStarted2(title: String, description: String, uiState: SellCountUiState) {
+private fun CardStylePage(title: String, description: String, content: @Composable () -> Unit) {
     ContainerInSection(WtSections.wtSectionBgGrayDark) {
-        H1(attrs = {
-            classes(WtTexts.wtH2, WtTexts.wtH2ThemeDark)
-        }) {
-            Text(title)
-        }
-
-        Div(attrs = {
-            classes(WtRows.wtRowSizeM, WtRows.wtRow, WtOffsets.wtTopOffset24)
-        }) {
-            Div(attrs = {
-                classes(WtCols.wtCol6, WtCols.wtColMd10, WtCols.wtColSm12, WtOffsets.wtTopOffset24)
-            }) {
-                P(attrs = {
-                    classes(WtTexts.wtText1)
-                    style {
-                        color(Color("#fff"))
-                    }
-                }) {
-                    Text(description)
-                }
-            }
-        }
+        PageTitle(title)
+        PageDescription(description)
 
         Div(
             attrs = {
                 classes(WtRows.wtRow, WtRows.wtRowSizeM, WtOffsets.wtTopOffset24)
             }
         ) {
-            uiState.taichungAirList?.map {
-                GetStartedCardPresentation(
-                    title = "${it.name}-${it.item}",
-                    content = "${it.value}(${it.status})"
-                )
-            }?.forEach {
-                CardDark(
-                    title = it.title,
-                    links = it.links,
-                    wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
-                ) {
-                    CardContent(it.content)
-                }
-            } ?: Text("Empty List...")
+            content()
+        }
+    }
+}
+
+@Composable
+fun MixedInfoPage(title: String, description: String, uiState: SellCountUiState) {
+    CardStylePage(title, description) {
+        getCards(uiState).forEach {
+            CardDark(
+                title = it.title,
+                links = it.links,
+                wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
+            ) {
+                CardContent(it.content)
+            }
+        }
+    }
+}
+
+@Composable
+fun TaichungWaterPage(title: String, description: String, airList: List<TaichungAir> = emptyList()) {
+    CardStylePage(title, description) {
+        airList.map {
+            GetStartedCardPresentation(
+                title = "${it.name}-${it.item}",
+                content = "${it.value}(${it.status})"
+            )
+        }.forEach {
+            CardDark(
+                title = it.title,
+                links = it.links,
+                wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
+            ) {
+                CardContent(it.content)
+            }
+        }
+    }
+}
+
+@Composable
+fun TainanCctvPage(title: String, description: String, cctvList: List<TainanCctv> = emptyList()) {
+    CardStylePage(title, description) {
+        cctvList.filter {
+            it.url != null
+        }.map {
+            GetStartedCardPresentation(
+                title = "${it.positionName}",
+                content = "${it.lat}${it.lon}",
+                links = listOf(LinkOnCard(it.positionName, it.url ?: ""))
+            )
+        }.forEach {
+            CardDark(
+                title = it.title,
+                links = it.links,
+                wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
+            ) {
+                CardContent(it.content)
+            }
         }
     }
 }

@@ -5,11 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.sample.model.Stock
 import com.sample.model.TaichungAir
+import com.sample.model.TainanCctv
 import com.sample.web.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 
 data class SellCountUiState(
@@ -19,16 +21,17 @@ data class SellCountUiState(
     val stock: String = "Loading..",
     val hospitalWaitingId: String = "Loading...",
     val taipeiTraffic: String = "Loading...",
-    val taichungAir: String = "Loading...",
-    val taichungAirList: List<TaichungAir>? = null
+    val taichungAir: String = "Loading..."
 )
 
 class MainViewModel {
     private val scope = MainScope()
     private val dataRepo = MainDataRepo()
     var uiState: SellCountUiState by mutableStateOf(SellCountUiState())
+    var taichungAirList: List<TaichungAir> by mutableStateOf((emptyList()))
+    var tainanCctvList: List<TainanCctv> by mutableStateOf(emptyList())
 
-    init{
+    init {
         getCountByFilter()
         getUBike()
         getCms()
@@ -45,7 +48,7 @@ class MainViewModel {
                     it[filterId]
                 }.let {
                     "${it?.name},剩餘:${it?.count},Note:${it?.note ?: "無"}"
-                }.let{
+                }.let {
                     uiState = uiState.copy(rapidTest = it)
                 }
         }
@@ -62,62 +65,89 @@ class MainViewModel {
         }
     }
 
-    private fun getCms(){
+    private fun getCms() {
         scope.launch {
-            WebApi.getCmsList().let{
-                uiState = uiState.copy(cms = it.locations.random().run{
+            WebApi.getCmsList().let {
+                uiState = uiState.copy(cms = it.locations.random().run {
                     "${cmsName}:${cmsMsg}"
                 })
-        } }
+            }
+        }
     }
 
-    private fun getStore(id: String = "2330"){
+    private fun getStore(id: String = "2330") {
         scope.launch {
             WebApi.getStock().let {
                 it.msgArray.first().z
-            }.let{ currentPrice ->
+            }.let { currentPrice ->
                 uiState = uiState.copy(stock = currentPrice)
             }
         }
     }
 
-    private fun getTaipeiTraffic(){
+    private fun getTaipeiTraffic() {
         scope.launch {
-            uiState = WebApi.getTaipeiTraffic().let{
+            uiState = WebApi.getTaipeiTraffic().let {
                 it.newsList
-            }.let{
+            }.let {
                 it.random()
-            }.let{
+            }.let {
                 it.content
-            }.let{
+            }.let {
                 uiState.copy(taipeiTraffic = it)
             }
         }
     }
 
-    private fun getTaichungAir(){
+    private fun getTaichungAir() {
         scope.launch {
-            uiState = WebApi.getTaichungAir().let{
-                uiState = uiState.copy(taichungAirList = it)
+            uiState = WebApi.getTaichungAir().let {
+                taichungAirList = it
                 it.random()
-            }.let{
+            }.let {
                 "${it.name} - ${it.value} (${it.time})"
-            }.let{
+            }.let {
                 uiState.copy(taichungAir = it)
             }
         }
     }
 
-    private fun getHospital(){
+    private fun getHospital() {
         scope.launch {
-            dataRepo.getHospital().let{
+            dataRepo.getHospital().let {
                 uiState = uiState.copy(hospitalWaitingId = it)
             }
         }
     }
+
+    val data =
+        """
+    [
+    {
+        "位置": "101南科南路環西路一段",
+        "經度": "120.2825374",
+        "緯度": "23.09058354",
+        "網址": "http://61.60.90.18:5001/Live?channel=1201&mode=0"
+    },
+    {
+        "位置": "106南科三路道爺路",
+        "經度": "120.2825374",
+        "緯度": "23.09058354",
+        "網址": "http://61.60.90.18:5001/Live?channel=1206&mode=0"
+    }
+    ]
+    """.trim()
+    
+    fun getTainanCctv(){
+        scope.launch {
+            tainanCctvList =
+                //Json{}.decodeFromString(ListSerializer(TainanCctv.serializer()),data)
+                WebApi.Tainan.getCctv()
+        }
+    }
 }
 
-class MainDataRepo{
+class MainDataRepo {
     //<td class="room-tartime winfo-data">0004</td>
     //Regex regex = new Regex("<span[^>]*>(.*?)</span>");
     //string toMatch = "<span class=\"ajjsjs\">Some text</span>";
@@ -125,13 +155,13 @@ class MainDataRepo{
         WebApi.getCross()
     }
 
-    suspend fun getHospital() = withContext(Dispatchers.Default){
-        WebApi.getHospital().let{
+    suspend fun getHospital() = withContext(Dispatchers.Default) {
+        WebApi.getHospital().let {
             val preTag = "room-tartime winfo-data\">"
             val startIndex = it.indexOf(preTag) + preTag.length
             var endIndex = 0
-            for(i in startIndex..it.length){
-                if(it[i] == '<'){
+            for (i in startIndex..it.length) {
+                if (it[i] == '<') {
                     endIndex = i
                     break;
                 }
