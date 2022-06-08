@@ -153,11 +153,27 @@ fun TaichungWaterPage(title: String, description: String, airList: List<Taichung
     }
 }
 
+// TODO add loading
 @Composable
-fun TainanCctvPage(title: String, description: String, cctvList: List<TainanCctv> = emptyList()) {
+fun TainanCctvPage(
+    title: String,
+    description: String,
+    cctvFilterName: String? = null,
+    cctvList: List<TainanCctv> = emptyList()
+) {
     CardStylePage(title, description) {
         cctvList.filter {
-            it.url != null
+            if(cctvFilterName == null){
+                it.url != null
+            }else{
+                it.url != null && it.positionName == cctvFilterName
+            }
+        }.filter {
+            if(cctvFilterName == null){
+                true
+            }else{
+                it.positionName == cctvFilterName
+            }
         }.forEach { cctv ->
             val uiState = mutableStateOf(CctvUiState())
             CardDark(

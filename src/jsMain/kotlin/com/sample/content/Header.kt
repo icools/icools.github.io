@@ -7,10 +7,11 @@ import org.jetbrains.compose.web.css.*
 import org.jetbrains.compose.web.dom.*
 import com.sample.style.*
 import kotlinx.browser.window
+import org.w3c.dom.url.URL
 
 //@Preview
 @Composable
-fun Header() {
+fun Header(title: String ="v1.0") {
     Section(attrs = {
         classes(WtSections.wtSectionBgGrayDark)
     }) {
@@ -21,6 +22,7 @@ fun Header() {
                 Logo()
                 // TODO: support i18n
                 //LanguageButton()
+                Text(title)
             }
         }
     }
