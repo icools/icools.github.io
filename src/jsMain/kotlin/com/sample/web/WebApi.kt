@@ -67,6 +67,11 @@ object WebApi {
     object Tainan{
         suspend fun getCctv(): List<TainanCctv> = jsonClient.get(getUrl("/tainanCctv"))
     }
+
+    object Traveling{
+
+        suspend fun getHotTravelSpot(): TravelResponse = jsonClient.get(getUrl("/traveling"))
+    }
 }
 
 // 水位 https://data.gov.tw/dataset/25768

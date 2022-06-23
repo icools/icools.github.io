@@ -1,5 +1,8 @@
 package com.sample.model
 
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+
 @kotlinx.serialization.Serializable
 data class Stock (
     val msgArray: List<MsgArray>,
@@ -63,4 +66,10 @@ data class Stock (
         val sessionFromTime: Long,
         val sessionLatestTime: Long
     )
+
+    companion object{
+        fun toJson(data: Stock) = Json.encodeToString(Stock.serializer(),data)
+
+        fun fromJson(it: String) = Json.decodeFromString(serializer(),it)
+    }
 }

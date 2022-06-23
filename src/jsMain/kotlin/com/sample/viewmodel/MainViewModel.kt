@@ -3,16 +3,18 @@ package com.sample.viewmodel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.sample.model.Stock
+import com.sample.TopicEnum
 import com.sample.model.TaichungAir
 import com.sample.model.TainanCctv
+import com.sample.model.TravelResponse
 import com.sample.web.*
+import kotlinx.browser.localStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import org.w3c.dom.get
+import org.w3c.dom.set
 
 data class SellCountUiState(
     val ubike: String = "Loading...",
@@ -24,21 +26,46 @@ data class SellCountUiState(
     val taichungAir: String = "Loading..."
 )
 
-class MainViewModel {
+class MainViewModel(topic: TopicEnum) {
     private val scope = MainScope()
     private val dataRepo = MainDataRepo()
     var uiState: SellCountUiState by mutableStateOf(SellCountUiState())
+
     var taichungAirList: List<TaichungAir> by mutableStateOf((emptyList()))
+        private set
+
     var tainanCctvList: List<TainanCctv> by mutableStateOf(emptyList())
+        private set
+
+    var travelingResponse: TravelResponse by mutableStateOf(TravelResponse())
+        private set
 
     init {
-        getCountByFilter()
-        getUBike()
-        getCms()
-        getStore()
-        getHospital()
-        getTaipeiTraffic()
-        getTaichungAir()
+        when(topic){
+            TopicEnum.CCTV -> getTainanCctv()
+            TopicEnum.TRAVELING -> getTraveling()
+            TopicEnum.UBIKE -> getUBike()
+            TopicEnum.WATER -> TODO()
+            TopicEnum.REALTIME -> getCms()
+            TopicEnum.ALL -> {
+                getCountByFilter()
+                getStore()
+                getHospital()
+                getTaipeiTraffic()
+                getTaichungAir()
+            }
+        }
+    }
+
+    private fun getTraveling() {
+        localStorage.get(TopicEnum.TRAVELING.value)?.let{
+            travelingResponse = TravelResponse.fromJson(it)
+        }
+
+        scope.launch {
+            travelingResponse = dataRepo.getTraveling()
+            localStorage.set(TopicEnum.TRAVELING.value,travelingResponse.toJson())
+        }
     }
 
     private fun getCountByFilter(filterId: String = "593106") {
@@ -120,29 +147,16 @@ class MainViewModel {
         }
     }
 
-    val data =
-        """
-    [
-    {
-        "位置": "101南科南路環西路一段",
-        "經度": "120.2825374",
-        "緯度": "23.09058354",
-        "網址": "http://61.60.90.18:5001/Live?channel=1201&mode=0"
-    },
-    {
-        "位置": "106南科三路道爺路",
-        "經度": "120.2825374",
-        "緯度": "23.09058354",
-        "網址": "http://61.60.90.18:5001/Live?channel=1206&mode=0"
-    }
-    ]
-    """.trim()
-    
     fun getTainanCctv(){
+        localStorage.get(TopicEnum.CCTV.value)?.let{
+            tainanCctvList = TainanCctv.fromJson(it)
+        }
+
         scope.launch {
-            tainanCctvList =
-                //Json{}.decodeFromString(ListSerializer(TainanCctv.serializer()),data)
-                WebApi.Tainan.getCctv()
+            tainanCctvList = WebApi.Tainan.getCctv()
+            TainanCctv.toJson(tainanCctvList).let{
+                localStorage.set(TopicEnum.CCTV.value,it)
+            }
         }
     }
 }
@@ -168,6 +182,10 @@ class MainDataRepo {
             }
             it.substring(startIndex..endIndex)
         }//.toInt()
+    }
+
+    suspend fun getTraveling() = withContext(Dispatchers.Default){
+        WebApi.Traveling.getHotTravelSpot()
     }
 }
 

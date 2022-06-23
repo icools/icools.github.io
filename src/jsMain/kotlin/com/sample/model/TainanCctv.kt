@@ -1,6 +1,8 @@
 package com.sample.model
 
 import kotlinx.serialization.SerialName
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 
 @kotlinx.serialization.Serializable
 data class TainanCctv(
@@ -12,4 +14,10 @@ data class TainanCctv(
     val lon: String,
     @SerialName("網址")
     val url: String? = null
-)
+){
+    companion object{
+        fun toJson(data:List<TainanCctv>) = Json.encodeToString(ListSerializer(TainanCctv.serializer()),data)
+
+        fun fromJson(it: String) = Json.decodeFromString(ListSerializer(serializer()),it)
+    }
+}
