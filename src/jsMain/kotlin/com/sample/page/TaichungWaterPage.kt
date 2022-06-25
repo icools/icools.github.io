@@ -9,7 +9,7 @@ import com.sample.model.TaichungAir
 import com.sample.style.WtCols
 
 @Composable
-fun TaichungWaterPage(title: String, description: String, airList: List<TaichungAir> = emptyList()) {
+fun TaichungAirPage(title: String, description: String, airList: List<TaichungAir> = emptyList()) {
     CardStylePage(title, description) {
         airList.filterIndexed { index, _ ->
             index < 9

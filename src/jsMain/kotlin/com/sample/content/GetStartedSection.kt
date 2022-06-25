@@ -33,16 +33,6 @@ fun getCards(uiState: SellCountUiState) = listOf(
         )
     ),
     GetStartedCardPresentation(
-        title = "UBike",
-        content = uiState.ubike,
-        links = listOf(
-            LinkOnCard(
-                linkText = "Explore the source code",
-                linkUrl = "https://github.com/JetBrains/compose-jb/tree/master/examples/web-landing"
-            )
-        )
-    ),
-    GetStartedCardPresentation(
         title = "台積電股價",
         content = uiState.stock
     ),

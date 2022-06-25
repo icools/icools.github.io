@@ -80,16 +80,6 @@ private fun IntroAboutComposeWeb(uiState: SellCountUiState) {
             }
             Text(uiState.rapidTest)
 
-            P({ classes(WtOffsets.wtTopOffset24) }) {
-                Text("UBIKE資訊:")
-                Text(uiState.ubike)
-            }
-
-//            P({ classes(WtOffsets.wtTopOffset24) }) {
-//                Text("CMS:")
-//                Text(uiState.cms)
-//            }
-
             //ComposeWebStatusMessage()
             //IntroCodeSample()
 

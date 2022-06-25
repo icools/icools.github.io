@@ -4,23 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.sample.TopicEnum
-import com.sample.model.Cms
-import com.sample.model.TaichungAir
-import com.sample.model.TainanCctv
-import com.sample.model.TravelResponse
+import com.sample.model.*
 import com.sample.model.stock.StockNewTo
+import com.sample.storageCache
 import com.sample.web.*
-import csstype.Top
-import kotlinx.browser.localStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.w3c.dom.get
-import org.w3c.dom.set
+import kotlinx.coroutines.*
 
 data class SellCountUiState(
-    val ubike: String = "Loading...",
     val rapidTest: String = "Loading...",
     val stock: String = "Loading..",
     val hospitalWaitingId: String = "Loading...",
@@ -48,13 +38,16 @@ class MainViewModel(topic: TopicEnum) {
     var cmsResponse: Cms by mutableStateOf(Cms())
         private set
 
+    var ubikeList: List<Ubike> by mutableStateOf((emptyList()))
+        private set
+
     init {
-        when(topic){
+        when (topic) {
             TopicEnum.CCTV -> getTainanCctv()
             TopicEnum.TRAVELING -> getTraveling()
             TopicEnum.UBIKE -> getUBike()
             TopicEnum.WATER -> getTaichungAir()
-            TopicEnum.REALTIME -> getCms()
+            TopicEnum.CMS -> getCms()
             TopicEnum.STOCK -> getStockNewTo()
             TopicEnum.ALL -> {
                 //getCountByFilter() // 疫苗
@@ -68,24 +61,26 @@ class MainViewModel(topic: TopicEnum) {
     // TODO delegate localStorage by
 
     private fun getStockNewTo() {
-        localStorage.get(TopicEnum.STOCK.value)?.let{
-            stockNewToList = StockNewTo.fromJson(it)
-        }
-
-        scope.launch {
-            stockNewToList = dataRepo.getStockNewTo()
-            localStorage.set(TopicEnum.STOCK.value,StockNewTo.toJson(stockNewToList))
+        scope.storageCache(TopicEnum.STOCK,{
+            StockNewTo.fromJson(it)
+        }, {
+            StockNewTo.toJson(it)
+        }, {
+            dataRepo.getStockNewTo()
+        }){
+            stockNewToList = it
         }
     }
 
     private fun getTraveling() {
-        localStorage.get(TopicEnum.TRAVELING.value)?.let{
-            travelingResponse = TravelResponse.fromJson(it)
-        }
-
-        scope.launch {
-            travelingResponse = dataRepo.getTraveling()
-            localStorage.set(TopicEnum.TRAVELING.value,travelingResponse.toJson())
+        scope.storageCache(TopicEnum.TRAVELING,{
+            TravelResponse.fromJson(it)
+        }, {
+            it.toJson()
+        },{
+            dataRepo.getTraveling()
+        }){
+            travelingResponse = it
         }
     }
 
@@ -103,24 +98,26 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getUBike() {
-        scope.launch {
-            val data = WebApi.getUBikeList().takeIf {
-                it.isNotEmpty()
-            }?.random()?.let {
-                "${it.sna} Total:${it.tot} ,Time:${it.updateTime}"
-            } ?: "Loading..."
-            uiState = uiState.copy(ubike = data)
+        scope.storageCache(TopicEnum.UBIKE,{
+            Ubike.fromJson(it)
+        },{
+            Ubike.toJson(it)
+        },{
+            WebApi.getUBikeList()
+        }){
+            ubikeList = it
         }
     }
 
     private fun getCms() {
-        localStorage.get(TopicEnum.REALTIME.value)?.let{
-            cmsResponse = Cms.fromJson(it)
-        }
-
-        scope.launch {
-            cmsResponse = WebApi.getCmsList()
-            localStorage[TopicEnum.REALTIME.value] = Cms.toJson(cmsResponse)
+        scope.storageCache(TopicEnum.CMS,{
+            Cms.fromJson(it)
+        },{
+            Cms.toJson(it)
+        },{
+            WebApi.getCmsList()
+        }){
+            cmsResponse = it
         }
     }
 
@@ -169,16 +166,15 @@ class MainViewModel(topic: TopicEnum) {
         }
     }
 
-    fun getTainanCctv(){
-        localStorage.get(TopicEnum.CCTV.value)?.let{
-            tainanCctvList = TainanCctv.fromJson(it)
-        }
-
-        scope.launch {
-            tainanCctvList = WebApi.Tainan.getCctv()
-            TainanCctv.toJson(tainanCctvList).let{
-                localStorage.set(TopicEnum.CCTV.value,it)
-            }
+    private fun getTainanCctv() {
+        scope.storageCache(TopicEnum.CCTV,{
+            TainanCctv.fromJson(it)
+        }, {
+            TainanCctv.toJson(it)
+        }, {
+            WebApi.Tainan.getCctv()
+        }){
+            tainanCctvList = it
         }
     }
 }

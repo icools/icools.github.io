@@ -1,10 +1,20 @@
 package com.sample.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+
 @kotlinx.serialization.Serializable
-data class Ubike (
-    val sno: String,
-    val sna: String,
-    val tot: Long,
+data class Ubike(
+    @SerialName("sno")
+    val stationNumber: String,
+
+    @SerialName("sna")
+    val stationName: String,
+
+    @SerialName("tot")
+    val totalCount: Long,
+
     val sbi: Long,
     val sarea: String,
     val mday: String,
@@ -20,4 +30,10 @@ data class Ubike (
     val updateTime: String,
     val infoTime: String,
     val infoDate: String
-)
+) {
+    companion object {
+        fun toJson(data: List<Ubike>) = Json.encodeToString(ListSerializer(Ubike.serializer()), data)
+
+        fun fromJson(it: String) = Json.decodeFromString(ListSerializer(Ubike.serializer()), it)
+    }
+}
