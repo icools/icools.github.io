@@ -4,10 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.sample.TopicEnum
+import com.sample.model.Cms
 import com.sample.model.TaichungAir
 import com.sample.model.TainanCctv
 import com.sample.model.TravelResponse
+import com.sample.model.stock.StockNewTo
 import com.sample.web.*
+import csstype.Top
 import kotlinx.browser.localStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
@@ -19,7 +22,6 @@ import org.w3c.dom.set
 data class SellCountUiState(
     val ubike: String = "Loading...",
     val rapidTest: String = "Loading...",
-    val cms: String = "Loading...",
     val stock: String = "Loading..",
     val hospitalWaitingId: String = "Loading...",
     val taipeiTraffic: String = "Loading...",
@@ -28,7 +30,7 @@ data class SellCountUiState(
 
 class MainViewModel(topic: TopicEnum) {
     private val scope = MainScope()
-    private val dataRepo = MainDataRepo()
+    private val dataRepo = MainRepository()
     var uiState: SellCountUiState by mutableStateOf(SellCountUiState())
 
     var taichungAirList: List<TaichungAir> by mutableStateOf((emptyList()))
@@ -40,20 +42,39 @@ class MainViewModel(topic: TopicEnum) {
     var travelingResponse: TravelResponse by mutableStateOf(TravelResponse())
         private set
 
+    var stockNewToList: List<StockNewTo> by mutableStateOf(emptyList())
+        private set
+
+    var cmsResponse: Cms by mutableStateOf(Cms())
+        private set
+
     init {
         when(topic){
             TopicEnum.CCTV -> getTainanCctv()
             TopicEnum.TRAVELING -> getTraveling()
             TopicEnum.UBIKE -> getUBike()
-            TopicEnum.WATER -> TODO()
+            TopicEnum.WATER -> getTaichungAir()
             TopicEnum.REALTIME -> getCms()
+            TopicEnum.STOCK -> getStockNewTo()
             TopicEnum.ALL -> {
-                getCountByFilter()
-                getStore()
-                getHospital()
+                //getCountByFilter() // 疫苗
+                //getStore()
+                //getHospital()
                 getTaipeiTraffic()
-                getTaichungAir()
             }
+        }
+    }
+
+    // TODO delegate localStorage by
+
+    private fun getStockNewTo() {
+        localStorage.get(TopicEnum.STOCK.value)?.let{
+            stockNewToList = StockNewTo.fromJson(it)
+        }
+
+        scope.launch {
+            stockNewToList = dataRepo.getStockNewTo()
+            localStorage.set(TopicEnum.STOCK.value,StockNewTo.toJson(stockNewToList))
         }
     }
 
@@ -93,12 +114,13 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getCms() {
+        localStorage.get(TopicEnum.REALTIME.value)?.let{
+            cmsResponse = Cms.fromJson(it)
+        }
+
         scope.launch {
-            WebApi.getCmsList().let {
-                uiState = uiState.copy(cms = it.locations.random().run {
-                    "${cmsName}:${cmsMsg}"
-                })
-            }
+            cmsResponse = WebApi.getCmsList()
+            localStorage[TopicEnum.REALTIME.value] = Cms.toJson(cmsResponse)
         }
     }
 
@@ -158,34 +180,6 @@ class MainViewModel(topic: TopicEnum) {
                 localStorage.set(TopicEnum.CCTV.value,it)
             }
         }
-    }
-}
-
-class MainDataRepo {
-    //<td class="room-tartime winfo-data">0004</td>
-    //Regex regex = new Regex("<span[^>]*>(.*?)</span>");
-    //string toMatch = "<span class=\"ajjsjs\">Some text</span>";
-    suspend fun getCross(): String = withContext(Dispatchers.Default) {
-        WebApi.getCross()
-    }
-
-    suspend fun getHospital() = withContext(Dispatchers.Default) {
-        WebApi.getHospital().let {
-            val preTag = "room-tartime winfo-data\">"
-            val startIndex = it.indexOf(preTag) + preTag.length
-            var endIndex = 0
-            for (i in startIndex..it.length) {
-                if (it[i] == '<') {
-                    endIndex = i
-                    break;
-                }
-            }
-            it.substring(startIndex..endIndex)
-        }//.toInt()
-    }
-
-    suspend fun getTraveling() = withContext(Dispatchers.Default){
-        WebApi.Traveling.getHotTravelSpot()
     }
 }
 

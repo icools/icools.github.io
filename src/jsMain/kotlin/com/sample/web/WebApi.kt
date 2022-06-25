@@ -1,6 +1,7 @@
 package com.sample.web
 
 import com.sample.model.*
+import com.sample.model.stock.StockNewTo
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
@@ -71,6 +72,27 @@ object WebApi {
     object Traveling{
 
         suspend fun getHotTravelSpot(): TravelResponse = jsonClient.get(getUrl("/traveling"))
+    }
+
+    object TwseStock{
+
+        /**
+         * 最近上市股票
+         */
+        suspend fun getNewTo(): List<StockNewTo> = jsonClient.get(getUrl("/twse_stock"))
+
+        /**
+         * 董監持股
+         */
+        // https://openapi.twse.com.tw/#/%E5%85%AC%E5%8F%B8%E6%B2%BB%E7%90%86/get_opendata_t187ap11_L
+
+        /**
+         * 每日收盤行情-大盤統計資訊
+         */
+
+        /**
+         * 電子式交易統計資訊
+         */
     }
 }
 

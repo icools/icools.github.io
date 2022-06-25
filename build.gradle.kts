@@ -15,11 +15,10 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    mavenCentral()
     google()
 }
-
 
 kotlin {
     js(IR) {

@@ -85,10 +85,10 @@ private fun IntroAboutComposeWeb(uiState: SellCountUiState) {
                 Text(uiState.ubike)
             }
 
-            P({ classes(WtOffsets.wtTopOffset24) }) {
-                Text("CMS:")
-                Text(uiState.cms)
-            }
+//            P({ classes(WtOffsets.wtTopOffset24) }) {
+//                Text("CMS:")
+//                Text(uiState.cms)
+//            }
 
             //ComposeWebStatusMessage()
             //IntroCodeSample()

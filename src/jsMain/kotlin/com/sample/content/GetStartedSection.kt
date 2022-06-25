@@ -43,16 +43,8 @@ fun getCards(uiState: SellCountUiState) = listOf(
         )
     ),
     GetStartedCardPresentation(
-        title = "CMS",
-        content = uiState.cms
-    ),
-    GetStartedCardPresentation(
         title = "台積電股價",
         content = uiState.stock
-    ),
-    GetStartedCardPresentation(
-        title = "臺北市即時交通訊息",
-        content = uiState.taipeiTraffic
     ),
     GetStartedCardPresentation(
         title = "診所候診",

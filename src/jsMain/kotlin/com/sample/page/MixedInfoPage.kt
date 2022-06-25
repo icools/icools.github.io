@@ -4,20 +4,28 @@ import androidx.compose.runtime.Composable
 import com.sample.components.CardContent
 import com.sample.components.CardDark
 import com.sample.content.CardStylePage
-import com.sample.content.getCards
+import com.sample.model.Cms
 import com.sample.style.WtCols
-import com.sample.viewmodel.SellCountUiState
 
 @Composable
-fun MixedInfoPage(title: String, description: String, uiState: SellCountUiState) {
+fun MixedInfoPage(title: String, description: String, cms: Cms) {
     CardStylePage(title, description) {
-        getCards(uiState).forEach {
+        if(cms.locations.isEmpty()){
             CardDark(
-                title = it.title,
-                links = it.links,
+                title = "讀取中,有點耐心...",
                 wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
             ) {
-                CardContent(it.content)
+                CardContent("在等等喔")
+            }
+            return@CardStylePage
+        }
+
+        cms.locations.forEach {
+            CardDark(
+                title = "${it.cmsName}(${it.cmsId})",
+                wtExtraStyleClasses = listOf(WtCols.wtCol4, WtCols.wtColMd6, WtCols.wtColSm12)
+            ) {
+                CardContent(it.cmsMsg)
             }
         }
     }
