@@ -1,6 +1,7 @@
 package com.sample
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import com.sample.components.*
 import com.sample.content.CardStylePage
 import com.sample.content.Header
@@ -10,12 +11,10 @@ import com.sample.model.Ubike
 import com.sample.model.stock.StockNewTo
 import com.sample.page.*
 import com.sample.style.AppStylesheet
-import com.sample.style.WtCols
 import com.sample.viewmodel.MainViewModel
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
 import org.jetbrains.compose.web.css.Style
-import org.jetbrains.compose.web.dom.Text
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.get
 import org.w3c.dom.url.URL
@@ -30,30 +29,56 @@ import org.w3c.dom.url.URL
 
 //MixedInfoPage("即時資訊卡片", "Realtime dashboard", viewModel.uiState)
 //TaichungWaterPage("台中空氣", "about the water", viewModel.taichungAirList)
-
 //IntroCustom(viewModel.uiState)
 //Intro()
 //ComposeWebLibraries()
 //CodeSamples()
 //JoinUs()
+
 fun main() {
-    lateinit var viewModel: MainViewModel
     renderComposable(rootElementId = "root") {
         Style(AppStylesheet)
         val (p, name) = URL(window.location.href).toPageSearchParams()
         val topic = TopicEnum.parsing(p)
 
-        viewModel = MainViewModel(topic)
+        val scope = rememberCoroutineScope()
+        val viewModel = MainViewModel(topic,scope)
+
         Layout {
             Header()
             MainContentLayout {
                 when (topic) {
-                    TopicEnum.CMS -> MixedInfoPage("即時資訊卡片", "Realtime dashboard", viewModel.cmsResponse)
-                    TopicEnum.WATER -> TaichungAirPage("台中空氣", "about the water", viewModel.taichungAirList)
-                    TopicEnum.TRAVELING -> AddTravelingPage(viewModel)
-                    TopicEnum.CCTV -> AddTainanCctv(viewModel, name)
-                    TopicEnum.STOCK -> AddStockPage(viewModel)
-                    TopicEnum.UBIKE -> AddUBikePage(viewModel)
+                    TopicEnum.CMS -> MixedInfoPage(
+                        title = "即時資訊卡片",
+                        description = "Realtime dashboard",
+                        cms = viewModel.cmsResponse
+                    )
+                    TopicEnum.WATER -> TaichungAirPage(
+                        title = "台中空氣",
+                        description = "about the water",
+                        airList = viewModel.taichungAirList
+                    )
+                    TopicEnum.TRAVELING -> TravelingPage(
+                        title = "觀光旅遊",
+                        description = "about 觀光",
+                        travelResponse = viewModel.travelingResponse
+                    )
+                    TopicEnum.CCTV -> TainanCctvPage(
+                        title = "台南CCTV",
+                        description = "cctv",
+                        cctvFilterName = name,
+                        cctvList = viewModel.tainanCctvList
+                    )
+                    TopicEnum.STOCK -> StockPage(
+                        title = "TWSET股票資訊",
+                        description = "最近上市股票",
+                        stockList = viewModel.stockNewToList
+                    )
+                    TopicEnum.UBIKE -> UBikePage(
+                        title = "UBike",
+                        description = "台北剩餘車位",
+                        ubikeList = viewModel.ubikeList
+                    )
                     else -> {
                         AllServiceCard()
                     }
@@ -72,34 +97,58 @@ fun AllServiceCard() {
     )
 
     CardStylePage("Ktor Compose for web", "所有的api 服務清單") {
-        ServiceCard("台南CCTV", "from tainan Open source api取得", TopicEnum.CCTV)
-
         val stockCache = localStorage.get(TopicEnum.STOCK.value)?.let{
             StockNewTo.fromJson(it)
         }?.random()?.let{
             it.company
         } ?: "台灣股票OpenApi"
-        ServiceCard("Twse股票", stockCache, TopicEnum.STOCK)
-
-        ServiceCard("觀光局", "熱門景點", TopicEnum.TRAVELING)
 
         val cmsCache = localStorage.get(TopicEnum.CMS.value)?.let{
             Cms.fromJson(it).locations
         }?.random()?.let{
             it.cmsMsg
         } ?: "台北CMS即時資訊"
-        ServiceCard("路況資訊", cmsCache, TopicEnum.CMS)
 
-        ServiceCard("台中空氣資訊", "施工中", TopicEnum.WATER)
-
-        (localStorage.get(TopicEnum.UBIKE.value)?.let{
+        val ubikeDesc = (localStorage.get(TopicEnum.UBIKE.value)?.let{
             Ubike.fromJson(it)
         }?.random()?.let{
             "${it.stationName} + ${it.sbi}/${it.totalCount}"
-        } ?: "剩餘車位").let{
-            ServiceCard("UBike", it, TopicEnum.UBIKE)
-        }
+        } ?: "剩餘車位")
 
-        //ServiceCard("快篩即時資訊", "施工中", TopicEnum.ALL)
+        ServiceCard(
+            title = "台南CCTV",
+            description = "from tainan Open source api取得",
+            topic = TopicEnum.CCTV
+        )
+
+        ServiceCard(
+            title = "Twse股票",
+            description = stockCache,
+            topic = TopicEnum.STOCK
+        )
+
+        ServiceCard(
+            title = "觀光局",
+            description = "熱門景點",
+            topic = TopicEnum.TRAVELING
+        )
+
+        ServiceCard(
+            title = "路況資訊",
+            description = cmsCache,
+            topic = TopicEnum.CMS
+        )
+
+        ServiceCard(
+            title = "台中空氣資訊",
+            description = "施工中",
+            topic = TopicEnum.WATER
+        )
+
+        ServiceCard(
+            title = "UBike",
+            description = ubikeDesc,
+            topic = TopicEnum.UBIKE
+        )
     }
 }

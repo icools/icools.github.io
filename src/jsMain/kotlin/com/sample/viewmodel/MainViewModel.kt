@@ -18,8 +18,7 @@ data class SellCountUiState(
     val taichungAir: String = "Loading..."
 )
 
-class MainViewModel(topic: TopicEnum) {
-    private val scope = MainScope()
+class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope) {
     private val dataRepo = MainRepository()
     var uiState: SellCountUiState by mutableStateOf(SellCountUiState())
 
@@ -61,19 +60,18 @@ class MainViewModel(topic: TopicEnum) {
     // TODO delegate localStorage by
 
     private fun getStockNewTo() {
-        scope.storageCache(TopicEnum.STOCK,{
-            StockNewTo.fromJson(it)
-        }, {
-            StockNewTo.toJson(it)
-        }, {
-            dataRepo.getStockNewTo()
-        }){
+        coroutineScope.storageCache(
+            topic = TopicEnum.STOCK,
+            loadFromJson = StockNewTo.Companion::fromJson,
+            objectToString = StockNewTo.Companion::toJson,
+            fetchFromService = dataRepo::getStockNewTo
+        ) {
             stockNewToList = it
         }
     }
 
     private fun getTraveling() {
-        scope.storageCache(TopicEnum.TRAVELING,{
+        coroutineScope.storageCache(TopicEnum.TRAVELING,{
             TravelResponse.fromJson(it)
         }, {
             it.toJson()
@@ -85,7 +83,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getCountByFilter(filterId: String = "593106") {
-        scope.launch {
+        coroutineScope.launch {
             WebApi.getSellCount()
                 .let {
                     it[filterId]
@@ -98,7 +96,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getUBike() {
-        scope.storageCache(TopicEnum.UBIKE,{
+        coroutineScope.storageCache(TopicEnum.UBIKE,{
             Ubike.fromJson(it)
         },{
             Ubike.toJson(it)
@@ -110,7 +108,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getCms() {
-        scope.storageCache(TopicEnum.CMS,{
+        coroutineScope.storageCache(TopicEnum.CMS,{
             Cms.fromJson(it)
         },{
             Cms.toJson(it)
@@ -122,7 +120,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getStore(id: String = "2330") {
-        scope.launch {
+        coroutineScope.launch {
             WebApi.getStock().let {
                 it.msgArray.first().z
             }.let { currentPrice ->
@@ -132,7 +130,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getTaipeiTraffic() {
-        scope.launch {
+        coroutineScope.launch {
             uiState = WebApi.getTaipeiTraffic().let {
                 it.newsList
             }.let {
@@ -146,7 +144,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getTaichungAir() {
-        scope.launch {
+        coroutineScope.launch {
             uiState = WebApi.getTaichungAir().let {
                 taichungAirList = it
                 it.random()
@@ -159,7 +157,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getHospital() {
-        scope.launch {
+        coroutineScope.launch {
             dataRepo.getHospital().let {
                 uiState = uiState.copy(hospitalWaitingId = it)
             }
@@ -167,7 +165,7 @@ class MainViewModel(topic: TopicEnum) {
     }
 
     private fun getTainanCctv() {
-        scope.storageCache(TopicEnum.CCTV,{
+        coroutineScope.storageCache(TopicEnum.CCTV,{
             TainanCctv.fromJson(it)
         }, {
             TainanCctv.toJson(it)
