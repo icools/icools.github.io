@@ -6,11 +6,12 @@ import io.ktor.client.*
 import io.ktor.client.features.json.*
 import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.decodeFromString
 
 // https://data.gov.tw/
-
 object WebApi {
     private const val USING_LOCALHOST = false
 
@@ -23,7 +24,9 @@ object WebApi {
         //return jsonClient.get("https://odws.hccg.gov.tw/001/Upload/25/opendataback/9059/452/25d47dd1-ac2b-405f-ac52-ba2f8b3071b6.json")
     }
 
-    suspend fun getUBikeList(): List<Ubike> = jsonClient.get("https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json")
+    suspend fun getUBikeList(): List<Ubike> = withContext(Dispatchers.Default) {
+        jsonClient.get("https://tcgbusfs.blob.core.windows.net/dotapp/youbike/v2/youbike_immediate.json")
+    }
 
     suspend fun getSellCount(): Map<String, RapidTestStore> {
         return jsonClient.get<String>("https://raw.githubusercontent.com/SiongSng/Rapid-Antigen-Test-Taiwan-Map/data/data/antigen.json")
@@ -95,6 +98,7 @@ object WebApi {
          */
     }
 }
+
 
 // 水位 https://data.gov.tw/dataset/25768
 

@@ -12,8 +12,13 @@ import com.sample.model.stock.StockNewTo
 import com.sample.page.*
 import com.sample.style.AppStylesheet
 import com.sample.viewmodel.MainViewModel
+import com.sample.viewmodel.UbikeViewModel
 import kotlinx.browser.localStorage
 import kotlinx.browser.window
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.serializer
 import org.jetbrains.compose.web.css.Style
 import org.jetbrains.compose.web.renderComposable
 import org.w3c.dom.get
@@ -43,6 +48,7 @@ fun main() {
 
         val scope = rememberCoroutineScope()
         val viewModel = MainViewModel(topic,scope)
+        val ubikeViewModel = UbikeViewModel(topic,scope)
 
         Layout {
             Header()
@@ -77,7 +83,7 @@ fun main() {
                     TopicEnum.UBIKE -> UBikePage(
                         title = "UBike",
                         description = "台北剩餘車位",
-                        ubikeList = viewModel.ubikeList
+                        ubikeList = ubikeViewModel.ubikeList
                     )
                     else -> {
                         AllServiceCard()
@@ -97,23 +103,15 @@ fun AllServiceCard() {
     )
 
     CardStylePage("Ktor Compose for web", "所有的api 服務清單") {
-        val stockCache = localStorage.get(TopicEnum.STOCK.value)?.let{
-            StockNewTo.fromJson(it)
-        }?.random()?.let{
-            it.company
-        } ?: "台灣股票OpenApi"
+        val stockCache = getLocalStorageListByTopic<StockNewTo>(TopicEnum.STOCK)
+            ?.random()?.company ?: "台灣股票OpenApi"
 
-        val cmsCache = localStorage.get(TopicEnum.CMS.value)?.let{
-            Cms.fromJson(it).locations
-        }?.random()?.let{
-            it.cmsMsg
-        } ?: "台北CMS即時資訊"
+        val cmsCache = getLocalStorageByTopic<Cms>(TopicEnum.CMS)?.locations
+            ?.random()?.cmsMsg ?: "台北CMS即時資訊"
 
-        val ubikeDesc = (localStorage.get(TopicEnum.UBIKE.value)?.let{
-            Ubike.fromJson(it)
-        }?.random()?.let{
+        val ubikeDesc = getLocalStorageListByTopic<Ubike>(TopicEnum.UBIKE)?.random()?.let{
             "${it.stationName} + ${it.sbi}/${it.totalCount}"
-        } ?: "剩餘車位")
+        } ?: "剩餘車位"
 
         ServiceCard(
             title = "台南CCTV",
@@ -150,5 +148,19 @@ fun AllServiceCard() {
             description = ubikeDesc,
             topic = TopicEnum.UBIKE
         )
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+private inline fun <reified T: Any> getLocalStorageByTopic(topic: TopicEnum): T? {
+    return localStorage.get(topic.value)?.let {
+        Json.decodeFromString(T::class.serializer(), it)
+    }
+}
+
+@OptIn(InternalSerializationApi::class)
+private inline fun <reified T: Any> getLocalStorageListByTopic(topic: TopicEnum): List<T>? {
+    return localStorage.get(topic.value)?.let {
+        Json.decodeFromString(ListSerializer(T::class.serializer()), it)
     }
 }

@@ -6,17 +6,11 @@ import androidx.compose.runtime.setValue
 import com.sample.TopicEnum
 import com.sample.model.*
 import com.sample.model.stock.StockNewTo
-import com.sample.storageCache
+import com.sample.storageCacheFlow
+import com.sample.storageCacheList
 import com.sample.web.*
 import kotlinx.coroutines.*
-
-data class SellCountUiState(
-    val rapidTest: String = "Loading...",
-    val stock: String = "Loading..",
-    val hospitalWaitingId: String = "Loading...",
-    val taipeiTraffic: String = "Loading...",
-    val taichungAir: String = "Loading..."
-)
+import kotlinx.coroutines.flow.collect
 
 class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope) {
     private val dataRepo = MainRepository()
@@ -37,14 +31,10 @@ class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope)
     var cmsResponse: Cms by mutableStateOf(Cms())
         private set
 
-    var ubikeList: List<Ubike> by mutableStateOf((emptyList()))
-        private set
-
     init {
         when (topic) {
             TopicEnum.CCTV -> getTainanCctv()
             TopicEnum.TRAVELING -> getTraveling()
-            TopicEnum.UBIKE -> getUBike()
             TopicEnum.WATER -> getTaichungAir()
             TopicEnum.CMS -> getCms()
             TopicEnum.STOCK -> getStockNewTo()
@@ -60,25 +50,24 @@ class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope)
     // TODO delegate localStorage by
 
     private fun getStockNewTo() {
-        coroutineScope.storageCache(
-            topic = TopicEnum.STOCK,
-            loadFromJson = StockNewTo.Companion::fromJson,
-            objectToString = StockNewTo.Companion::toJson,
-            fetchFromService = dataRepo::getStockNewTo
-        ) {
-            stockNewToList = it
+        coroutineScope.launch{
+            storageCacheList(
+                topic = TopicEnum.STOCK,
+                fetchFromService = dataRepo::getStockNewTo
+            ).collect {
+                stockNewToList = it
+            }
         }
     }
 
     private fun getTraveling() {
-        coroutineScope.storageCache(TopicEnum.TRAVELING,{
-            TravelResponse.fromJson(it)
-        }, {
-            it.toJson()
-        },{
-            dataRepo.getTraveling()
-        }){
-            travelingResponse = it
+        coroutineScope.launch {
+            storageCacheFlow(
+                topic = TopicEnum.TRAVELING,
+                fetchFromService = dataRepo::getTraveling
+            ).collect {
+                travelingResponse = it
+            }
         }
     }
 
@@ -95,27 +84,14 @@ class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope)
         }
     }
 
-    private fun getUBike() {
-        coroutineScope.storageCache(TopicEnum.UBIKE,{
-            Ubike.fromJson(it)
-        },{
-            Ubike.toJson(it)
-        },{
-            WebApi.getUBikeList()
-        }){
-            ubikeList = it
-        }
-    }
-
     private fun getCms() {
-        coroutineScope.storageCache(TopicEnum.CMS,{
-            Cms.fromJson(it)
-        },{
-            Cms.toJson(it)
-        },{
-            WebApi.getCmsList()
-        }){
-            cmsResponse = it
+        coroutineScope.launch {
+            storageCacheFlow(
+                topic = TopicEnum.CMS,
+                fetchFromService = WebApi::getCmsList
+            ).collect {
+                cmsResponse = it
+            }
         }
     }
 
@@ -131,13 +107,7 @@ class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope)
 
     private fun getTaipeiTraffic() {
         coroutineScope.launch {
-            uiState = WebApi.getTaipeiTraffic().let {
-                it.newsList
-            }.let {
-                it.random()
-            }.let {
-                it.content
-            }.let {
+            uiState = WebApi.getTaipeiTraffic().newsList.random().content.let {
                 uiState.copy(taipeiTraffic = it)
             }
         }
@@ -165,14 +135,12 @@ class MainViewModel(topic: TopicEnum,private val coroutineScope: CoroutineScope)
     }
 
     private fun getTainanCctv() {
-        coroutineScope.storageCache(TopicEnum.CCTV,{
-            TainanCctv.fromJson(it)
-        }, {
-            TainanCctv.toJson(it)
-        }, {
-            WebApi.Tainan.getCctv()
-        }){
-            tainanCctvList = it
+        coroutineScope.launch {
+            storageCacheList<TainanCctv>(TopicEnum.CCTV) {
+                WebApi.Tainan.getCctv()
+            }.collect {
+                tainanCctvList = it
+            }
         }
     }
 }
