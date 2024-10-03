@@ -82,7 +82,7 @@ fun main() {
                     )
                     TopicEnum.UBIKE -> UBikePage(
                         title = "UBike",
-                        description = "台北剩餘車位",
+                        description = "台北剩餘車位(Bike)",
                         ubikeList = ubikeViewModel.ubikeList
                     )
                     else -> {
